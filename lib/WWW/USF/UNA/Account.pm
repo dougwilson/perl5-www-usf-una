@@ -1,4 +1,4 @@
-package WWW::USF::UNA;
+package WWW::USF::UNA::Account;
 
 use 5.008001;
 use strict;
@@ -19,27 +19,55 @@ use MooseX::StrictConstructor 0.08;
 use MooseX::Types::URI qw(Uri);
 
 ###########################################################################
-# MODULE IMPORTS
-use Net::SAJAX 0.102;
-use URI;
-use WWW::USF::UNA::Account;
-use WWW::USF::WebAuth;
-
-###########################################################################
 # ALL IMPORTS BEFORE THIS WILL BE ERASED
 use namespace::clean 0.04 -except => [qw(meta)];
 
 ###########################################################################
 # ATTRIBUTES
-has 'una_url' => (
-	is  => 'rw',
-	isa => Uri,
+has 'first_name' => (
+	is  => 'ro',
+	isa => 'Str',
 
-	documentation => q{This is the URL of the UNA page were the requests are made},
-	coerce  => 1,
-	default => 'https://netid.usf.edu/una/',
-	trigger => sub { shift->_sajax->url(shift); }, # Update the SAJAX URL
+	documentation => q{The first name of the person the account belongs to},
+	builder       => '_build_first_name',
+	lazy          => 1,
 );
+has 'last_name' => (
+	is  => 'ro',
+	isa => 'Str',
+
+	documentation => q{The last name of the person the account belongs to},
+	builder       => '_build_last_name',
+	lazy          => 1,
+);
+has 'nams_id' => (
+	is  => 'ro',
+	isa => 'Int',
+
+	documentation => q{The Network Access Management System ID of the account},
+	builder       => '_build_nams_id',
+	lazy          => 1,
+);
+has 'usf_id' => (
+	is  => 'ro',
+	isa => 'Str',
+
+	documentation => q{The university ID number of the account (USF ID)},
+	builder       => '_build_usf_id',
+	lazy          => 1,
+);
+
+###########################################################################
+# CONSTRUCTOR
+sub BUILD {
+	my ($self) = @_;
+
+	if (!$self->_is_user_agent_authenticated) {
+		Moose->throw_error('Provided user agent must be authenticated');
+	}
+
+	return;
+}
 
 ###########################################################################
 # PRIVATE ATTRIBUTES
@@ -49,57 +77,79 @@ has '_sajax' => (
 
 	builder => '_build_sajax',
 	lazy    => 1,
-	handles => {
-		user_agent => 'user_agent',
-	},
+);
+has '_una_url' => (
+	is  => 'ro',
+	isa => Uri,
+	init_arg => 'una_url',
+
+	coerce  => 1,
+	default => 'https://netid.usf.edu/una/',
+	trigger => sub { shift->_sajax->url(shift); }, # Update the SAJAX URL
+);
+has '_user_agent' => (
+	is  => 'ro',
+	isa => 'LWP::UserAgent',
+	init_arg => 'authenticated_user_agent',
+
+	required => 1,
+	trigger  => sub { shift->_sajax->user_agent(shift); }, # Update the SAJAX UA
 );
 
 ###########################################################################
-# METHODS
-sub get_account {
-	my ($self, %args) = @_;
+# PRIVATE BUILDERS
+sub _build_all_names {
+	my ($self, $want) = @_;
 
-	# Make a copy of the user agent to give to the new account object
-	my $user_agent = $self->_sajax->user_agent->clone;
-
-	# Make sure there is a cookie jar
-	if (!defined $user_agent->cookie_jar) {
-		$user_agent->cookie_jar({});
-	}
-
-	# Make a WebAuth object to log in with
-	my $webauth = WWW::USF::WebAuth->new(
-		netid      => $args{username},
-		password   => $args{password},
-		user_agent => $user_agent,
+	my $name = $self->_sajax->call(
+		function => 'getnamebybadge',
+		method   => 'POST',
 	);
 
-	# Attempt to authenticate with UNA
-	my $response = $webauth->authenticate(service => $self->una_url);
+	$self->{first_name} = $name->{0};
+	$self->{last_name } = $name->{1};
 
-	if (!$response->is_success) {
-		Moose->throw_error('Authentication failed'
-			. ($response->has_notification ? ': ' . $response->notification : q{}));
-	}
+	return $self->{$want};
+}
+sub _build_first_name {
+	return shift->_build_all_names('first_name');
+}
+sub _build_last_name {
+	return shift->_build_all_names('last_name');
+}
+sub _build_nams_id {
+	my ($self) = @_;
 
-	# Make the user agent navigate to the destination to get any cookies.
-	$user_agent->get($response->destination);
-
-	# Create a new account
-	return WWW::USF::UNA::Account->new(
-		authenticated_user_agent => $user_agent,
-		una_url                  => $self->una_url->clone,
+	return $self->_sajax->call(
+		function => 'GetNamsid',
+		method   => 'POST',
 	);
 }
-
-###########################################################################
-# PRIVATE BUILDERS
 sub _build_sajax {
 	my ($self) = @_;
 
 	# This will return a SAJAX object with default options
 	return Net::SAJAX->new(
-		url => URI->new($self->una_url->clone),
+		url => $self->_una_url->clone,
+	);
+}
+sub _build_usf_id {
+	my ($self) = @_;
+
+	return $self->_sajax->call(
+		function => 'getUsfid',
+		method   => 'POST',
+	);
+}
+
+###########################################################################
+# PRIVATE METHODS
+sub _is_user_agent_authenticated {
+	my ($self) = @_;
+
+	return !!$self->_sajax->call(
+		function => 'GetAuthStatus',
+		method   => 'POST',
 	);
 }
 
@@ -113,7 +163,7 @@ __END__
 
 =head1 NAME
 
-WWW::USF::UNA - Access to USF's University Network Access site
+WWW::USF::UNA::Account - Representation of an account on the UNA site
 
 =head1 VERSION
 
@@ -121,21 +171,27 @@ Version 0.001
 
 =head1 SYNOPSIS
 
-  use WWW::USF::UNA;
+  # The account object is typically created by WWW::USF::UNA
+  my $account = ...
 
-  my $una = WWW::USF::UNA->new;
+  # Print the name of the person
+  say $account->first_name, q{ }, $account->last_name;
 
-  # Get an account (returns WWW::USF::UNA::Account)
-  my $account = $una->get_account(
-      username => $username,
-      password => $password,
-  );
+  # University identification number?
+  say $account->usf_id;
+
+  # Check the password of the account
+  say $account->is_password($password) ? 'That is the password'
+                                       : 'That is not the password'
+                                       ;
+
+  # Set a new password
+  $account->set_password($password, $new_password);
 
 =head1 DESCRIPTION
 
-This provides a way in which you can access the and interact with the
-University Network Access (UNA) site provided by the University of South
-Florida to manage user credentials.
+This provides a way to view and change details of an account through the UNA
+system.
 
 =head1 CONSTRUCTOR
 
@@ -168,30 +224,25 @@ L</ATTRIBUTES> section).
   # Get an attribute
   my $value = $object->attribute_name;
 
-=head2 una_url
+=head2 first_name
 
-This is the URL that commands are sent to in order to interact with UNA. This
-can be a L<URI> object or a string. This will always return a L<URI> object.
+The first name of the person the account belongs to.
+
+=head2 last_name
+
+The last name of the person the account belongs to.
+
+=head2 nams_id
+
+The Network Access Management System ID of the account.
+
+=head2 usf_id
+
+The university ID number of the account (USF ID).
 
 =head1 METHODS
 
-=head2 get_account
-
-This method will get an account object from UNA. The method takes a hash of
-arguments with the following keys:
-
-=over 4
-
-=item password
-
-This is the password for the account to be fetched. This is required if
-C<username> is specified.
-
-=item username
-
-This is the username for the account to be fetched.
-
-=back
+There are no methods provided.
 
 =head1 DEPENDENCIES
 
@@ -200,10 +251,6 @@ This is the username for the account to be fetched.
 =item * L<Moose> 0.89
 
 =item * L<MooseX::StrictConstructor> 0.08
-
-=item * L<MooseX::Types::URI>
-
-=item * L<Net::SAJAX> 0.102
 
 =item * L<namespace::clean> 0.04
 
@@ -228,7 +275,7 @@ bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-  perldoc WWW::USF::UNA
+  perldoc WWW::USF::UNA::Account
 
 You can also look for information at:
 

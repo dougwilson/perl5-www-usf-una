@@ -20,6 +20,13 @@ no_index:
     - inc
     - t
     - xt
+provides:
+  WWW::USF::UNA:
+    file: lib/WWW/USF/UNA.pm
+    version: 0.001
+  WWW::USF::UNA::Account:
+    file: lib/WWW/USF/UNA/Account.pm
+    version: 0.001
 requires:
   Moose: 0.89
   MooseX::StrictConstructor: 0.08
