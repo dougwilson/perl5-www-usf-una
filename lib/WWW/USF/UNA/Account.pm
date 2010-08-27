@@ -318,25 +318,46 @@ L</ATTRIBUTES> section).
   # Get an attribute
   my $value = $object->attribute_name;
 
+=head2 default_email_address
+
+This is the default e-mail address for the account.
+
 =head2 first_name
+
+B<Read-only>
 
 The first name of the person the account belongs to.
 
 =head2 last_name
 
+B<Read-only>
+
 The last name of the person the account belongs to.
 
 =head2 nams_id
+
+B<Read-only>
 
 The Network Access Management System ID of the account.
 
 =head2 usf_id
 
+B<Read-only>
+
 The university ID number of the account (USF ID).
 
 =head1 METHODS
 
-There are no methods provided.
+=head2 all_email_addresses
+
+This returns a list of all the e-mail addresses that are associated with
+the account.
+
+=head2 set_password
+
+This method takes the new password to set as the only argument and returns
+the object on success. On failure, an error with the reason for the failure
+is thrown.
 
 =head1 DEPENDENCIES
 
