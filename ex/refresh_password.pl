@@ -14,17 +14,22 @@ Readonly my $EXIT_SUCCESS => 0;
 my $netid = prompt(
 	-prompt => 'NetID: ',
 	-must   => { 'be specified' => sub { length shift } },
+	-verbatim,
 );
 
 # Prompt for password
 my $password = prompt(
 	-prompt => 'Password: ',
 	-echo   => '*',
-	-must   => { 'be specified' => sub { length shift} },
+	-must   => { 'be specified' => sub { length shift } },
+	-verbatim,
 );
 
 # Get the account
-my $account = WWW::USF::UNA->new->get_account($netid, $password);
+my $account = WWW::USF::UNA->new->get_account(
+	username => $netid,
+	password => $password,
+);
 
 {
 	# Remember the current password
@@ -35,11 +40,11 @@ my $account = WWW::USF::UNA->new->get_account($netid, $password);
 		my $new_password = $password . $new_suffix;
 
 		# Change the password
-		$account->change_password($current_password, $new_password);
+		$account->set_password($new_password);
 	}
 
 	# Change the password back to the original
-	$account->change_password($current_password, $password);
+	$account->set_password($password);
 }
 
 exit $EXIT_SUCCESS;

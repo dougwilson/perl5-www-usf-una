@@ -97,6 +97,32 @@ has '_user_agent' => (
 );
 
 ###########################################################################
+# METHODS
+sub set_password {
+	my ($self, $new_password) = @_;
+
+	# Attempt to set the password to the new password
+	my $result = $self->_sajax->call(
+		function  => 'SetPassword',
+		method    => 'POST',
+		arguments => [$new_password],
+	);
+
+	if ($result == 1) {
+		# Success short-circuit
+		return $self;
+	}
+
+	if ($result =~ m{in \s your \s password \s history}msx) {
+		# Password history error here
+		Moose->throw_error('Password in password history');
+	}
+	else {
+		Moose->throw_error($result);
+	}
+}
+
+###########################################################################
 # PRIVATE BUILDERS
 sub _build_all_names {
 	my ($self, $want) = @_;
