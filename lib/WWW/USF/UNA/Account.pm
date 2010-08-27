@@ -24,6 +24,27 @@ use namespace::clean 0.04 -except => [qw(meta)];
 
 ###########################################################################
 # ATTRIBUTES
+has 'default_email_address' => (
+	is => 'rw',
+	isa => 'Str',
+
+	documentation => q{The default e-mail address},
+	trigger       => \&_set_default_email_address,
+	builder       => '_build_default_email_address',
+	lazy          => 1,
+);
+has 'email_addresses' => (
+	is      => 'ro',
+	isa     => 'ArrayRef[Str]',
+	traits  => ['Array'],
+	handles => {
+		all_email_addresses => 'elements',
+	},
+
+	documentation => q{The e-mail addresses assigned to this account},
+	builder       => '_build_email_addresses',
+	lazy          => 1,
+);
 has 'first_name' => (
 	is  => 'ro',
 	isa => 'Str',
@@ -137,6 +158,24 @@ sub _build_all_names {
 
 	return $self->{$want};
 }
+sub _build_default_email_address {
+	return $_[0]->_sajax->call(
+		function => 'getdefaultemailaddress',
+		method   => 'POST',
+	);
+}
+sub _build_email_addresses {
+	my ($self) = @_;
+
+	my @addresses = values %{
+		$self->_sajax->call(
+			function => 'getassignedemailaddresses',
+			method   => 'POST',
+		)
+	};
+
+	return \@addresses;
+}
 sub _build_first_name {
 	return $_[0]->_build_all_names('first_name');
 }
@@ -177,6 +216,35 @@ sub _is_user_agent_authenticated {
 		function => 'GetAuthStatus',
 		method   => 'POST',
 	);
+}
+sub _set_default_email_address {
+	my ($self, $new_default_email_address, $old_default_email_address) = @_;
+
+	# Set the new default e-mail address (UNA states this updates SQL)
+	my $set_status = $self->_sajax->call(
+		arguments => [$new_default_email_address],
+		function  => 'updatedefaultemailaddress',
+		method    => 'POST',
+	);
+
+	if (!$set_status) {
+		# Setting failed; revert default e-mail address
+		$self->{default_email_address} = $old_default_email_address;
+	}
+
+	# Set the new default e-mail address (UNA states this updates LDAP)
+	$set_status = $self->_sajax->call(
+		arguments => [$new_default_email_address],
+		function  => 'updatedefaultemailaddress_netid',
+		method    => 'POST',
+	);
+
+	if (!$set_status) {
+		# Setting failed; revert default e-mail address
+		$self->{default_email_address} = $old_default_email_address;
+	}
+
+	return;
 }
 
 ###########################################################################
