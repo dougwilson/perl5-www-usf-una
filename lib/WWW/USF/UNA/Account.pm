@@ -138,10 +138,10 @@ sub _build_all_names {
 	return $self->{$want};
 }
 sub _build_first_name {
-	return shift->_build_all_names('first_name');
+	return $_[0]->_build_all_names('first_name');
 }
 sub _build_last_name {
-	return shift->_build_all_names('last_name');
+	return $_[0]->_build_all_names('last_name');
 }
 sub _build_nams_id {
 	my ($self) = @_;
