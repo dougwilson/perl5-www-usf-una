@@ -3,7 +3,6 @@ Changes
 ex/refresh_password.pl
 lib/WWW/USF/UNA.pm
 lib/WWW/USF/UNA/Account.pm
-Makefile.PL
 MANIFEST			This list of files
 META.yml
 README
