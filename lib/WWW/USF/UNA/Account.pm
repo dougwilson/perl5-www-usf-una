@@ -365,11 +365,17 @@ is thrown.
 
 =over 4
 
-=item * L<Moose> 0.89
+=item * L<Moose|Moose> 0.89
 
-=item * L<MooseX::StrictConstructor> 0.08
+=item * L<MooseX::StrictConstructor|MooseX::StrictConstructor> 0.08
 
-=item * L<namespace::clean> 0.04
+=item * L<MooseX::Types::Email|MooseX::Types::Email>
+
+=item * L<MooseX::Types::Moose|MooseX::Types::Moose>
+
+=item * L<MooseX::Types::URI|MooseX::Types::URI>
+
+=item * L<namespace::clean|namespace::clean> 0.04
 
 =back
 
@@ -379,7 +385,7 @@ Douglas Christopher Wilson, C<< <doug at somethingdoug.com> >>
 
 =head1 BUGS AND LIMITATIONS
 
-There are no indended limitations, and so if you find a feature in UNA that is
+There are no intended limitations, and so if you find a feature in UNA that is
 not implemented here, please let me know.
 
 Please report any bugs or feature requests to

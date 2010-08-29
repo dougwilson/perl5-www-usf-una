@@ -171,7 +171,8 @@ L</ATTRIBUTES> section).
 =head2 una_url
 
 This is the URL that commands are sent to in order to interact with UNA. This
-can be a L<URI> object or a string. This will always return a L<URI> object.
+can be a L<URI|URI> object or a string. This will always return a L<URI|URI>
+object.
 
 =head1 METHODS
 
@@ -185,11 +186,11 @@ arguments with the following keys:
 =item password
 
 This is the password for the account to be fetched. This is required if
-C<username> is specified.
+L</username> is specified.
 
 =item username
 
-This is the username for the account to be fetched.
+This is the user name for the account to be fetched.
 
 =back
 
@@ -197,15 +198,15 @@ This is the username for the account to be fetched.
 
 =over 4
 
-=item * L<Moose> 0.89
+=item * L<Moose|Moose> 0.89
 
-=item * L<MooseX::StrictConstructor> 0.08
+=item * L<MooseX::StrictConstructor|MooseX::StrictConstructor> 0.08
 
-=item * L<MooseX::Types::URI>
+=item * L<MooseX::Types::URI|MooseX::Types::URI>
 
-=item * L<Net::SAJAX> 0.102
+=item * L<Net::SAJAX|Net::SAJAX> 0.102
 
-=item * L<namespace::clean> 0.04
+=item * L<namespace::clean|namespace::clean> 0.04
 
 =back
 
@@ -215,7 +216,7 @@ Douglas Christopher Wilson, C<< <doug at somethingdoug.com> >>
 
 =head1 BUGS AND LIMITATIONS
 
-There are no indended limitations, and so if you find a feature in UNA that is
+There are no intended limitations, and so if you find a feature in UNA that is
 not implemented here, please let me know.
 
 Please report any bugs or feature requests to
