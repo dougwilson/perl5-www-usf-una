@@ -131,18 +131,17 @@ sub set_password {
 		arguments => [$new_password],
 	);
 
-	if ($result == 1) {
-		# Success short-circuit
-		return $self;
+	if ($result != 1) {
+		if ($result =~ m{in \s your \s password \s history}msx) {
+			# Password history error here
+			Moose->throw_error('Password in password history');
+		}
+		else {
+			Moose->throw_error($result);
+		}
 	}
 
-	if ($result =~ m{in \s your \s password \s history}msx) {
-		# Password history error here
-		Moose->throw_error('Password in password history');
-	}
-	else {
-		Moose->throw_error($result);
-	}
+	return $self;
 }
 
 ###########################################################################
