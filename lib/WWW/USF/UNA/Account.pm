@@ -16,6 +16,8 @@ use MooseX::StrictConstructor 0.08;
 
 ###########################################################################
 # MOOSE TYPES
+use MooseX::Types::Email qw(EmailAddress);
+use MooseX::Types::Moose qw(ArrayRef);
 use MooseX::Types::URI qw(Uri);
 
 ###########################################################################
@@ -25,8 +27,8 @@ use namespace::clean 0.04 -except => [qw(meta)];
 ###########################################################################
 # ATTRIBUTES
 has 'default_email_address' => (
-	is => 'rw',
-	isa => 'Str',
+	is  => 'rw',
+	isa => EmailAddress,
 
 	documentation => q{The default e-mail address},
 	trigger       => \&_set_default_email_address,
@@ -35,7 +37,7 @@ has 'default_email_address' => (
 );
 has 'email_addresses' => (
 	is      => 'ro',
-	isa     => 'ArrayRef[Str]',
+	isa     => ArrayRef[EmailAddress],
 	traits  => ['Array'],
 	handles => {
 		all_email_addresses => 'elements',
