@@ -1,19 +1,19 @@
-#!/usr/bin/env perl -T
+#!/usr/bin/env perl
 
-use 5.010;
+use v5.10.1;
 use strict;
 use warnings 'all';
 
 # MODULE IMPORTS
+use Const::Fast qw(const);
 use Getopt::Long 2.32 ();
 use IO::Prompter 0.001001 ();
-use Readonly 1.03;
 use Try::Tiny;
 use WWW::USF::UNA 0.001 ();
 
 # CONSTANTS
-Readonly my $EXIT_SUCCESS => 0;
-Readonly my $EXIT_FAILURE => 1;
+const my $EXIT_SUCCESS => 0;
+const my $EXIT_FAILURE => 1;
 
 # Command line variables
 my $netid;

@@ -1,14 +1,14 @@
 #!/usr/bin/env perl -T
 
-use 5.010;
+use v5.10.1;
 use strict;
 use warnings 'all';
 
+use Const::Fast qw(const);
 use IO::Prompter 0.001001;
-use Readonly 1.03;
 use WWW::USF::UNA;
 
-Readonly my $EXIT_SUCCESS => 0;
+const my $EXIT_SUCCESS => 0;
 
 # Prompt user for NetID
 my $netid = prompt(
