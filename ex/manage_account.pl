@@ -147,5 +147,5 @@ sub _get_netid_and_password {
 		);
 	}
 
-	return ($netid, $password);
+	return ("$netid", "$password");
 }

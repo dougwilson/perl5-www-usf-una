@@ -16,6 +16,8 @@ my $netid = prompt(
 	-must   => { 'be specified' => sub { length shift } },
 	-verbatim,
 );
+# Need to force string because of IO::Prompter design
+$netid = "$netid";
 
 # Prompt for password
 my $password = prompt(
@@ -24,6 +26,8 @@ my $password = prompt(
 	-must   => { 'be specified' => sub { length shift } },
 	-verbatim,
 );
+# Need to force string because of IO::Prompter design
+$password = "$password";
 
 # Get the account
 my $account = WWW::USF::UNA->new->get_account(
