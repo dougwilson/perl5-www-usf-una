@@ -21,6 +21,10 @@ use MooseX::Types::Moose qw(ArrayRef);
 use MooseX::Types::URI qw(Uri);
 
 ###########################################################################
+# MODULES
+use Scalar::Util qw(looks_like_number);
+
+###########################################################################
 # ALL IMPORTS BEFORE THIS WILL BE ERASED
 use namespace::clean 0.04 -except => [qw(meta)];
 
@@ -131,7 +135,7 @@ sub set_password {
 		arguments => [$new_password],
 	);
 
-	if ($result != 1) {
+	if (!looks_like_number($result) || $result != 1) {
 		if ($result =~ m{in \s your \s password \s history}msx) {
 			# Password history error here
 			Moose->throw_error('Password in password history');

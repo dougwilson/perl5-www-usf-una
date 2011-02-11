@@ -34,6 +34,7 @@ my $build = Module::Build->new(
 		'MooseX::Types::Email'      => '0.001',
 		'MooseX::Types::URI'        => 0,
 		'Net::SAJAX'                => '0.102',
+		'Scalar::Util'              => 0,
 		'URI'                       => 0,
 		'namespace::clean'          => '0.04',
 	},
