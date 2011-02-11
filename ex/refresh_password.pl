@@ -39,13 +39,17 @@ my $account = WWW::USF::UNA->new->get_account(
 	# Remember the current password
 	my $current_password = $password;
 
-	foreach my $new_suffix (qw[! @ $ ^ *]) {
+	foreach my $new_suffix (qw[! @ $ ^ * !A @B $C ^D *E @@0]) {
 		# Add the suffix onto the new of the password
 		my $new_password = $password . $new_suffix;
+
+		say "Setting password to your password + $new_suffix";
 
 		# Change the password
 		$account->set_password($new_password);
 	}
+
+	say 'Setting password back to original';
 
 	# Change the password back to the original
 	$account->set_password($password);
