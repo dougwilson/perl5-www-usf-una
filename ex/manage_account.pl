@@ -72,6 +72,7 @@ while (!defined $account) {
 my $show_menu = 1;
 my %main_menu = (
 	'Set official e-mail address' => \&set_official_email_address,
+	'Set password'                => \&set_password,
 	'Exit'                        => sub { $show_menu = 0; },
 );
 
@@ -116,6 +117,47 @@ sub set_official_email_address {
 		say "The official e-mail address has been changed to $new_email_address";
 		say q{};
 	}
+}
+
+sub set_password {
+	my ($account) = @_;
+
+	# Blank line
+	say q{};
+
+	# Prompt for the new password
+	my $new_password = IO::Prompter::prompt(
+		-prompt => 'New password: ',
+		-echo   => '*',
+		-must   => { 'be specified' => sub { length shift } },
+		-verbatim,
+	);
+	$new_password = "$new_password";
+
+	# Prompt for the new password again
+	my $new_password_retype = IO::Prompter::prompt(
+		-prompt => 'Retype password: ',
+		-echo   => '*',
+		-must   => { 'be the same' => sub { $_[0] eq $new_password } },
+		-verbatim,
+	);
+
+	# Blank line
+	say q{};
+
+	# Attempt to set the new password
+	try {
+		$account->set_password($new_password);
+	}
+	catch {
+		my ($error) = $_ =~ m{\A (.+?) \s at \s}mosx;
+		say "Password change failed: $error";
+	};
+
+	# Blank line
+	say q{};
+
+	return;
 }
 
 sub _get_netid_and_password {
